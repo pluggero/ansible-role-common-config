@@ -1,0 +1,41 @@
+---
+# Hostname
+common_config_hostname: "" # leave "" to not change the hostname
+
+# Locale
+common_config_locale: "en_US.UTF-8"
+common_config_locale_extra: []
+# - "de_DE.UTF-8"
+# - "fr_FR.UTF-8"
+
+# Keyboard
+common_config_keyboard_layout: "us"
+common_config_keyboard_variant: ""
+common_config_keyboard_x11_conf: false # also write /etc/X11/xorg.conf.d/00-keyboard.conf
+
+# Timezone
+common_config_timezone: "UTC"
+
+# Time sync (systemd-timesyncd)
+common_config_ntp_servers: []
+# - "0.pool.ntp.org"
+# - "1.pool.ntp.org"
+common_config_ntp_fallback_servers: []
+# - "ntp.ubuntu.com"
+
+# /etc/hosts
+common_config_manage_hosts: true
+common_config_hosts_entries: []
+# - ip: "192.0.2.10"
+#   hostnames:
+#     - "app.internal"
+#     - "app"
+
+# /etc/resolv.conf / systemd-resolved
+common_config_manage_resolv_conf: true
+common_config_dns_servers: []
+# - "1.1.1.1"
+# - "9.9.9.9"
+common_config_dns_fallback_servers: []
+common_config_dns_search_domains: []
+# - "example.internal"

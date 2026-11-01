@@ -1,0 +1,33 @@
+---
+- name: Check current /etc/resolv.conf state
+  ansible.builtin.stat:
+    path: /etc/resolv.conf
+  register: common_config_resolv_conf_stat
+  become: true
+  ignore_errors: "{{ ansible_check_mode }}"
+  when: common_config_manage_resolv_conf
+
+- name: Configure systemd-resolved
+  ansible.builtin.template:
+    src: resolved.conf.j2
+    dest: /etc/systemd/resolved.conf
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when:
+    - common_config_manage_resolv_conf
+    - common_config_resolv_conf_stat.stat.lnk_source is defined
+  notify: Restart systemd-resolved
+
+- name: Configure static /etc/resolv.conf
+  ansible.builtin.template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when:
+    - common_config_manage_resolv_conf
+    - common_config_resolv_conf_stat.stat.lnk_source is not defined

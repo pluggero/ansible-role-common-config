@@ -1,0 +1,21 @@
+---
+- name: Include OS-specific keyboard tasks
+  ansible.builtin.include_tasks: "{{ task_file }}"
+  with_first_found:
+    - "{{ role_path }}/tasks/noauto_keyboard_{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ role_path }}/tasks/noauto_keyboard_{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ role_path }}/tasks/noauto_keyboard_{{ ansible_distribution }}.yml"
+    - "{{ role_path }}/tasks/noauto_keyboard_{{ ansible_os_family }}.yml"
+    - "{{ role_path }}/tasks/noauto_keyboard_{{ ansible_lsb.id }}.yml"
+  loop_control:
+    loop_var: task_file
+
+- name: Configure X11 keyboard layout
+  ansible.builtin.template:
+    src: xorg_keyboard.conf.j2
+    dest: /etc/X11/xorg.conf.d/00-keyboard.conf
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when: common_config_keyboard_x11_conf

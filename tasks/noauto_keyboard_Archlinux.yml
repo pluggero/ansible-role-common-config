@@ -1,0 +1,10 @@
+---
+- name: Configure console keymap
+  ansible.builtin.template:
+    src: vconsole.conf.j2
+    dest: /etc/vconsole.conf
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: Apply keyboard configuration (Archlinux)

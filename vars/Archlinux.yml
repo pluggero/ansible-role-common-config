@@ -1,0 +1,3 @@
+---
+common_config_distro_pkgs:
+  - kbd

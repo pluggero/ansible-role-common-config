@@ -1,0 +1,7 @@
+{{ ansible_managed | comment }}
+{% for server in common_config_dns_servers %}
+nameserver {{ server }}
+{% endfor %}
+{% if common_config_dns_search_domains | length > 0 %}
+search {{ common_config_dns_search_domains | join(' ') }}
+{% endif %}

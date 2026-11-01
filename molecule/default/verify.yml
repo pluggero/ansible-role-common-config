@@ -1,0 +1,100 @@
+---
+- name: Verify
+  hosts: all
+
+  vars:
+    ansible_user: ansible
+    ansible_password: ansible
+    ansible_become_password: ansible
+
+  tasks:
+    - name: Assert hostname matches configured value
+      ansible.builtin.assert:
+        that: ansible_hostname == "molecule-test"
+        fail_msg: "Hostname is '{{ ansible_hostname }}', expected 'molecule-test'"
+
+    - name: Check timezone symlink target
+      ansible.builtin.stat:
+        path: /etc/localtime
+      register: common_config_verify_localtime
+
+    - name: Assert timezone symlink points to configured zone
+      ansible.builtin.assert:
+        that: "'Europe/Berlin' in common_config_verify_localtime.stat.lnk_source"
+        fail_msg: "/etc/localtime does not point to Europe/Berlin"
+
+    - name: Read Debian locale file
+      ansible.builtin.slurp:
+        src: /etc/default/locale
+      register: common_config_verify_locale_debian
+      when: ansible_os_family == "Debian"
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Read Archlinux locale file
+      ansible.builtin.slurp:
+        src: /etc/locale.conf
+      register: common_config_verify_locale_arch
+      when: ansible_os_family == "Archlinux"
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Assert configured locale is active
+      ansible.builtin.assert:
+        that: >-
+          "LANG=\"en_US.UTF-8\"" in (common_config_verify_locale_debian.content | default('') | b64decode)
+          or "LANG=en_US.UTF-8" in (common_config_verify_locale_arch.content | default('') | b64decode)
+        fail_msg: "Configured locale en_US.UTF-8 not found in locale env file"
+
+    - name: Read /etc/hosts
+      ansible.builtin.slurp:
+        src: /etc/hosts
+      register: common_config_verify_hosts
+
+    - name: Assert /etc/hosts contains configured entries
+      ansible.builtin.assert:
+        that:
+          - "'192.0.2.50' in (common_config_verify_hosts.content | b64decode)"
+          - "'molecule-extra' in (common_config_verify_hosts.content | b64decode)"
+          - "'127.0.0.1 molecule-test' in (common_config_verify_hosts.content | b64decode)"
+        fail_msg: "/etc/hosts is missing expected entries"
+
+    - name: Read timesyncd.conf
+      ansible.builtin.slurp:
+        src: /etc/systemd/timesyncd.conf
+      register: common_config_verify_timesyncd
+
+    - name: Assert timesyncd.conf has configured NTP server
+      ansible.builtin.assert:
+        that: "'NTP=0.pool.ntp.org' in (common_config_verify_timesyncd.content | b64decode)"
+        fail_msg: "timesyncd.conf does not contain the configured NTP server"
+
+    - name: Gather service facts
+      ansible.builtin.service_facts: {}
+
+    - name: Assert systemd-timesyncd is running
+      ansible.builtin.assert:
+        that: ansible_facts.services["systemd-timesyncd.service"].state == "running"
+        fail_msg: "systemd-timesyncd.service is not running"
+
+    - name: Check current /etc/resolv.conf state
+      ansible.builtin.stat:
+        path: /etc/resolv.conf
+      register: common_config_verify_resolv_stat
+
+    - name: Read resolved.conf
+      ansible.builtin.slurp:
+        src: /etc/systemd/resolved.conf
+      register: common_config_verify_resolved
+      when: common_config_verify_resolv_stat.stat.lnk_source is defined
+
+    - name: Read static resolv.conf
+      ansible.builtin.slurp:
+        src: /etc/resolv.conf
+      register: common_config_verify_resolv_static
+      when: common_config_verify_resolv_stat.stat.lnk_source is not defined
+
+    - name: Assert DNS configuration is correct
+      ansible.builtin.assert:
+        that: >-
+          "DNS=1.1.1.1 9.9.9.9" in (common_config_verify_resolved.content | default('') | b64decode)
+          or "nameserver 1.1.1.1" in (common_config_verify_resolv_static.content | default('') | b64decode)
+        fail_msg: "DNS configuration does not contain the configured servers"

@@ -1,0 +1,29 @@
+---
+- name: Uncomment requested locales in locale.gen
+  ansible.builtin.lineinfile:
+    path: /etc/locale.gen
+    regexp: "^#?\\s*{{ item }} UTF-8$"
+    line: "{{ item }} UTF-8"
+  loop: "{{ [common_config_locale] + common_config_locale_extra }}"
+  become: true
+  register: common_config_locale_gen_lines
+
+- name: Set fact for whether locale.gen changed
+  ansible.builtin.set_fact:
+    common_config_locale_gen_changed: "{{ common_config_locale_gen_lines.results
+      | selectattr('changed') | list | length > 0 }}"
+
+- name: Generate configured locales
+  ansible.builtin.command: locale-gen
+  become: true
+  when: common_config_locale_gen_changed
+  changed_when: common_config_locale_gen_changed
+
+- name: Set system default locale
+  ansible.builtin.template:
+    src: locale_default.j2
+    dest: /etc/default/locale
+    owner: root
+    group: root
+    mode: "0644"
+  become: true

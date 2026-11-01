@@ -1,0 +1,11 @@
+{{ ansible_managed | comment }}
+[Resolve]
+{% if common_config_dns_servers | length > 0 %}
+DNS={{ common_config_dns_servers | join(' ') }}
+{% endif %}
+{% if common_config_dns_fallback_servers | length > 0 %}
+FallbackDNS={{ common_config_dns_fallback_servers | join(' ') }}
+{% endif %}
+{% if common_config_dns_search_domains | length > 0 %}
+Domains={{ common_config_dns_search_domains | join(' ') }}
+{% endif %}

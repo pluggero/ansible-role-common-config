@@ -1,0 +1,6 @@
+---
+common_config_distro_pkgs:
+  - systemd-timesyncd
+  - locales
+  - keyboard-configuration
+  - console-setup

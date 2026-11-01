@@ -1,0 +1,21 @@
+---
+common_config_hostname: "molecule-test"
+common_config_locale: "en_US.UTF-8"
+common_config_locale_extra:
+  - "de_DE.UTF-8"
+common_config_keyboard_layout: "us"
+common_config_timezone: "Europe/Berlin"
+common_config_ntp_servers:
+  - "0.pool.ntp.org"
+common_config_ntp_fallback_servers:
+  - "ntp.ubuntu.com"
+common_config_hosts_entries:
+  - ip: "192.0.2.50"
+    hostnames:
+      - "molecule-extra.test"
+      - "molecule-extra"
+common_config_dns_servers:
+  - "1.1.1.1"
+  - "9.9.9.9"
+common_config_dns_search_domains:
+  - "molecule.test"

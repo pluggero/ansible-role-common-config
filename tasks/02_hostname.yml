@@ -1,0 +1,6 @@
+---
+- name: Set system hostname
+  ansible.builtin.hostname:
+    name: "{{ common_config_hostname }}"
+  become: true
+  when: common_config_hostname | length > 0
