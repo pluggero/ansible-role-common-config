@@ -10,6 +10,7 @@
     name: systemd-resolved
     state: restarted
   become: true
+  when: "'systemd-resolved.service' in ansible_facts.services"
 
 - name: Apply keyboard configuration (Debian)
   ansible.builtin.command: setupcon
