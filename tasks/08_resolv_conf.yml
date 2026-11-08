@@ -1,10 +1,24 @@
 ---
+- name: Gather service facts
+  ansible.builtin.service_facts: {}
+  when: common_config_manage_resolv_conf
+
 - name: Check current /etc/resolv.conf state
   ansible.builtin.stat:
     path: /etc/resolv.conf
   register: common_config_resolv_conf_stat
   become: true
   ignore_errors: "{{ ansible_check_mode }}"
+  when: common_config_manage_resolv_conf
+
+- name: Determine whether systemd-resolved manages DNS
+  ansible.builtin.set_fact:
+    common_config_resolv_conf_use_resolved: >-
+      {{
+        common_config_manage_resolv_conf
+        and common_config_resolv_conf_stat.stat.lnk_source is defined
+        and 'systemd-resolved.service' in ansible_facts.services
+      }}
   when: common_config_manage_resolv_conf
 
 - name: Configure systemd-resolved
@@ -15,9 +29,7 @@
     group: root
     mode: "0644"
   become: true
-  when:
-    - common_config_manage_resolv_conf
-    - common_config_resolv_conf_stat.stat.lnk_source is defined
+  when: common_config_resolv_conf_use_resolved
   notify: Restart systemd-resolved
 
 - name: Configure static /etc/resolv.conf
@@ -30,4 +42,4 @@
   become: true
   when:
     - common_config_manage_resolv_conf
-    - common_config_resolv_conf_stat.stat.lnk_source is not defined
+    - not common_config_resolv_conf_use_resolved
