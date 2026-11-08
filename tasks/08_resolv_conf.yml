@@ -29,7 +29,9 @@
     group: root
     mode: "0644"
   become: true
-  when: common_config_resolv_conf_use_resolved
+  when:
+    - common_config_manage_resolv_conf
+    - common_config_resolv_conf_use_resolved
   notify: Restart systemd-resolved
 
 - name: Configure static /etc/resolv.conf
