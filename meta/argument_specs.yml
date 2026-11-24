@@ -1,0 +1,100 @@
+---
+argument_specs:
+  main:
+    short_description: Configures common baseline system settings on different Linux distributions.
+    description: >-
+      Configures hostname, locale, keyboard layout, timezone, NTP time sync,
+      /etc/hosts entries, and DNS/resolv.conf settings shared across hosts.
+    options:
+      common_config_hostname:
+        type: str
+        required: false
+        default: ""
+        description: Hostname (or FQDN) to set on the host. Leave "" to not change the hostname.
+      common_config_locale:
+        type: str
+        required: false
+        default: "en_US.UTF-8"
+        description: Primary locale to generate and set as the system locale.
+      common_config_locale_extra:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: Additional locales to generate alongside common_config_locale.
+      common_config_keyboard_layout:
+        type: str
+        required: false
+        default: "us"
+        description: Keymap/layout code to set for the console and (optionally) X11.
+      common_config_keyboard_variant:
+        type: str
+        required: false
+        default: ""
+        description: Keyboard layout variant. Leave "" for the layout's default variant.
+      common_config_keyboard_x11_conf:
+        type: bool
+        required: false
+        default: false
+        description: Also write /etc/X11/xorg.conf.d/00-keyboard.conf with the keyboard layout/variant.
+      common_config_timezone:
+        type: str
+        required: false
+        default: "UTC"
+        description: IANA timezone name to set on the host.
+      common_config_ntp_servers:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: NTP server hostnames/IPs to use for time sync (systemd-timesyncd).
+      common_config_ntp_fallback_servers:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: Fallback NTP server hostnames/IPs used when the primary servers are unreachable.
+      common_config_manage_hosts:
+        type: bool
+        required: false
+        default: true
+        description: Whether this role manages entries in /etc/hosts.
+      common_config_hosts_entries:
+        type: list
+        elements: dict
+        required: false
+        default: []
+        description: Extra /etc/hosts entries to add, each mapping an IP to one or more hostnames.
+        options:
+          ip:
+            type: str
+            required: true
+            description: IPv4 or IPv6 address for this /etc/hosts entry.
+          hostnames:
+            type: list
+            elements: str
+            required: true
+            description: One or more hostnames to map to this entry's IP address.
+      common_config_manage_resolv_conf:
+        type: bool
+        required: false
+        default: true
+        description: Whether this role manages DNS settings (resolv.conf / systemd-resolved).
+      common_config_dns_servers:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: DNS server hostnames/IPs to configure.
+      common_config_dns_fallback_servers:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: Fallback DNS server hostnames/IPs used when the primary servers are unreachable.
+      common_config_dns_search_domains:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description: DNS search domains to configure.
