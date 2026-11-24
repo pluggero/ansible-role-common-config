@@ -12,14 +12,6 @@
       the hostname unchanged.
 
 # Locale
-- name: Assert common_config_locale_extra is a list
-  ansible.builtin.assert:
-    that:
-      - common_config_locale_extra is sequence
-      - common_config_locale_extra is not string
-    fail_msg: >-
-      common_config_locale_extra must be a list of locale strings, got: {{ common_config_locale_extra }}
-
 - name: Assert locale variables have a valid format
   ansible.builtin.assert:
     that:
@@ -44,13 +36,6 @@
       common_config_keyboard_variant ('{{ common_config_keyboard_variant }}') must be
       empty or follow the same format.
 
-- name: Assert common_config_keyboard_x11_conf is a boolean
-  ansible.builtin.assert:
-    that:
-      - common_config_keyboard_x11_conf in [true, false]
-    fail_msg: >-
-      common_config_keyboard_x11_conf must be a boolean (true/false), got: {{ common_config_keyboard_x11_conf }}
-
 # Timezone
 - name: Assert timezone has a valid format
   ansible.builtin.assert:
@@ -61,17 +46,6 @@
       name. Expected a format like "UTC", "Europe/Berlin", or "America/Argentina/Buenos_Aires".
 
 # Time sync (systemd-timesyncd)
-- name: Assert common_config_ntp_servers and common_config_ntp_fallback_servers are lists
-  ansible.builtin.assert:
-    that:
-      - common_config_ntp_servers is sequence
-      - common_config_ntp_servers is not string
-      - common_config_ntp_fallback_servers is sequence
-      - common_config_ntp_fallback_servers is not string
-    fail_msg: >-
-      common_config_ntp_servers and common_config_ntp_fallback_servers must be lists of
-      hostnames or IP addresses.
-
 - name: Assert NTP server entries have a valid format
   ansible.builtin.assert:
     that:
@@ -83,50 +57,17 @@
   loop: "{{ common_config_ntp_servers + common_config_ntp_fallback_servers }}"
 
 # /etc/hosts
-- name: Assert common_config_hosts_entries is a list
-  ansible.builtin.assert:
-    that:
-      - common_config_hosts_entries is sequence
-      - common_config_hosts_entries is not string
-    fail_msg: >-
-      common_config_hosts_entries must be a list of {ip, hostnames} dictionaries, got:
-      {{ common_config_hosts_entries }}
-
 - name: Assert each hosts entry has a valid ip and hostnames format
   ansible.builtin.assert:
     that:
-      - item.ip is defined
       - item.ip is ansible.builtin.regex("^[A-Za-z0-9.:]+$")
-      - item.hostnames is defined
-      - item.hostnames is sequence
-      - item.hostnames is not string
       - item.hostnames | length > 0
     fail_msg: >-
       common_config_hosts_entries entry {{ item }} must define a valid 'ip' (IPv4/IPv6
       address) and a non-empty 'hostnames' list.
   loop: "{{ common_config_hosts_entries }}"
 
-- name: Assert common_config_manage_hosts is a boolean
-  ansible.builtin.assert:
-    that:
-      - common_config_manage_hosts in [true, false]
-    fail_msg: >-
-      common_config_manage_hosts must be a boolean (true/false), got: {{ common_config_manage_hosts }}
-
 # /etc/resolv.conf / systemd-resolved
-- name: Assert DNS server variables are lists
-  ansible.builtin.assert:
-    that:
-      - common_config_dns_servers is sequence
-      - common_config_dns_servers is not string
-      - common_config_dns_fallback_servers is sequence
-      - common_config_dns_fallback_servers is not string
-      - common_config_dns_search_domains is sequence
-      - common_config_dns_search_domains is not string
-    fail_msg: >-
-      common_config_dns_servers, common_config_dns_fallback_servers, and
-      common_config_dns_search_domains must all be lists.
-
 - name: Assert DNS server entries have a valid format
   ansible.builtin.assert:
     that:
@@ -144,11 +85,3 @@
       DNS search domain '{{ item }}' (from common_config_dns_search_domains) is not a
       valid domain name.
   loop: "{{ common_config_dns_search_domains }}"
-
-- name: Assert common_config_manage_resolv_conf is a boolean
-  ansible.builtin.assert:
-    that:
-      - common_config_manage_resolv_conf in [true, false]
-    fail_msg: >-
-      common_config_manage_resolv_conf must be a boolean (true/false), got:
-      {{ common_config_manage_resolv_conf }}
